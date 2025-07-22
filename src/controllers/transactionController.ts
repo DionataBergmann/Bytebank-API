@@ -20,3 +20,26 @@ export const createTransaction = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Erro ao criar transação' })
   }
 }
+
+export const updateTransaction = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id)
+    const transaction = await prisma.transaction.update({
+      where: { id },
+      data: req.body
+    })
+    res.json(transaction)
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao atualizar transação' })
+  }
+}
+
+export const deleteTransaction = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id)
+    await prisma.transaction.delete({ where: { id } })
+    res.status(204).end()
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao deletar transação' })
+  }
+}
