@@ -29,5 +29,36 @@ export const login = async (req: Request, res: Response) => {
 
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '1d' })
 
-  res.json({ token })
+  res.json({
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email
+    }
+  })
+}
+export const getProfile = async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization
+    if (!authHeader) return res.status(401).json({ error: 'Token não fornecido' })
+
+    const [, token] = authHeader.split(' ')
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: number }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true
+      }
+    })
+
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' })
+
+    res.json(user)
+  } catch (error) {
+    res.status(401).json({ error: 'Token inválido' })
+  }
 }

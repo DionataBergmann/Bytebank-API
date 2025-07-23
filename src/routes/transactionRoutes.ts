@@ -18,14 +18,24 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', upload.single('file'), async (req, res) => {
   try {
-    const { type, value, date, category, file } = req.body
+    const { type, value, date, category } = req.body
+    const file = req.file?.filename || null
+
     const transaction = await prisma.transaction.create({
-      data: { type, value, date, category, file }
+      data: {
+        type,
+        value: Number(value),
+        date,
+        category,
+        file
+      }
     })
+
     res.status(201).json(transaction)
   } catch (error) {
+    console.error(error)
     res.status(500).json({ error: 'Erro ao criar transação' })
   }
 })
