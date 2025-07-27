@@ -40,15 +40,26 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.single('file'), async (req, res) => {
   try {
     const id = parseInt(req.params.id)
+    const { type, value, date, category } = req.body
+    const file = req.file?.filename || req.body.file || null
+
     const updated = await prisma.transaction.update({
       where: { id },
-      data: req.body
+      data: {
+        type,
+        value: Number(value),
+        date,
+        category,
+        file
+      }
     })
+
     res.json(updated)
   } catch (error) {
+    console.error(error)
     res.status(500).json({ error: 'Erro ao atualizar transação' })
   }
 })
